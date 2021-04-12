@@ -11,7 +11,7 @@
 void app_main()
 {
     gpio_pad_select_gpio(BLINK_GPIO);
-    /* Set the GPIO as a push/pull output */
+  
     gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
     while(1) {
         /* Blink off (output low) */
