@@ -9,8 +9,6 @@ typedef enum{
     AMARILLO,
     VERDE,
     RESTART,
-    INTERMITENTE,
-    INTERMITENTEOFF
 } estadoMEF_t;
 // Variable de estado (global)
 estadoMEF_t estadoActual;

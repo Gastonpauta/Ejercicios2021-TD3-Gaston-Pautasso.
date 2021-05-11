@@ -4,6 +4,7 @@
 static int led1 ;
 static int led2 ;
 static int led3 ;
+
 void configLed(int rojo, int amarillo, int verde){
 
 led1 = rojo ;
@@ -17,37 +18,44 @@ gpio_set_direction(rojo, GPIO_MODE_OUTPUT);
 gpio_set_direction(amarillo, GPIO_MODE_OUTPUT);
 gpio_set_direction(verde, GPIO_MODE_OUTPUT);
 }
-
 void secuencia(char k){
 
-    if(k =='R'){
+switch (k)
+{
+case 'R' : {
 
         gpio_set_level(led1, 1);
         gpio_set_level(led2, 0);
         gpio_set_level(led3, 0);
 }
-    if(k=='A'){
-        
+    break;
+case 'A' : {
+
         gpio_set_level(led1, 0);
         gpio_set_level(led2, 1);
         gpio_set_level(led3, 0);
 }
-    if(k=='V'){
-        
+    break;
+
+case 'V' : {
         gpio_set_level(led1, 0);
         gpio_set_level(led2, 0);
         gpio_set_level(led3, 1);
 }
-    if(k=='I'){
- 
+    break;
+
+case 'I' : {
+
         gpio_set_level(led1, 0);
         gpio_set_level(led2, 1);
         gpio_set_level(led3, 0);
 }
-    if(k=='O'){
- 
-        gpio_set_level(led1, 0);
+    break;
+
+default:
+        gpio_set_level(led1, 1);
         gpio_set_level(led2, 0);
         gpio_set_level(led3, 0);
+    break;
 }
 }
