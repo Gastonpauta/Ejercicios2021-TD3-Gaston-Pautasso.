@@ -11,7 +11,7 @@
 TickType_t tiempoA;           // se guarda la cantidad de ticks en alto
 TickType_t tiempoB ;          // se guarda la cantidad de ticks en bajo
 TickType_t tiempo_pulsado ;   // variable para almacenar los ticks contados
-TickType_t diferencia;        // ta
+static TickType_t diferencia = 1 ;   // se inicializa en 1 Para que el led comience destellando cada 1 tick
 typedef enum{
 
    BAJO,

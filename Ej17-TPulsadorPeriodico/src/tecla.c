@@ -94,7 +94,7 @@ void contadorticksB()
     TickType_t conteoTicksActuales = xTaskGetTickCount();   //Medimos el tiempo en ticks desde que inició el scheduler
     gpio_set_level(led2, 0 );     
     tiempoB  = conteoTicksActuales;
-    diferencia= tiempoB-tiempoA;   
+    diferencia = tiempoB-tiempoA;   
     }
 
 TickType_t tiempocontado()
