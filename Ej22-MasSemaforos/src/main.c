@@ -4,74 +4,75 @@
 #include "freertos/task.h"
 #include "freertos/FreeRTOSConfig.h"
 #include "driver/gpio.h"
-#include "../include/pulsador.h"
-#include "freertos/semphr.h" //librería para el uso de semaforos
+#include "../include/tecla.h"
+#include "freertos/semphr.h"
 
-#define SALIDA1     GPIO_NUM_33
-#define SALIDA2     GPIO_NUM_32
-#define T_ESPERA_MS  40
-#define T_ESPERA     pdMS_TO_TICKS(T_ESPERA_MS)
-#define PROCESADORA 0
-#define PROCESADORB 1
-#define LED_ON_MS    500
-#define LED_ON       pdMS_TO_TICKS(LED_ON_MS)
+#define led_rojo         GPIO_NUM_32  
+#define led_verde        GPIO_NUM_33
+#define PULSADOR         GPIO_NUM_25
+//#define PERIODO          pdMS_TO_TICKS(100) //Periodo fijo cada 1 segundo
+#define delay            pdMS_TO_TICKS(500)
+#define T_ESPERA_SEM     pdMS_TO_TICKS(1000) //tiempo de espera de semaforo en ticks
 
-void tareaDestello( void* taskParmPtr ); //Prototipo de la función de la tarea
-
+void tarealed( void * pvParameters );
+TaskHandle_t xHandle1 = NULL; 
 SemaphoreHandle_t semaforo = NULL; //Puntero al semaforo
 
-void app_main()
-{
+void app_main(){
+
+config_pulsador(PULSADOR);   //configuramos el pulsador
+
     //Crear el semáforo (arranca “tomado”)
-    semaforo = xSemaphoreCreateBinary();
+semaforo = xSemaphoreCreateBinary();
     if(semaforo == NULL)
     {
         printf("No se pudo crear el semaforo\n");
         while(true);
     }
-    // Crear tarea en freeRTOS
-    // Devuelve pdPASS si la tarea fue creada y agregada a la lista ready
-    // En caso contrario devuelve pdFAIL.
-    inicializarPulsador();
+         xTaskCreatePinnedToCore( 
 
-    BaseType_t res = xTaskCreatePinnedToCore(
-    	tareaDestello,                     	// Funcion de la tarea a ejecutar
-        "tareaDestello",   	                // Nombre de la tarea como String amigable para el usuario
-        configMINIMAL_STACK_SIZE, 		// Cantidad de stack de la tarea
-        NULL,                          	// Parametros de tarea
-        tskIDLE_PRIORITY+1,         	// Prioridad de la tarea -> Queremos que este un nivel encima de IDLE
-        NULL,                          		// Puntero a la tarea creada en el sistema
-        PROCESADORA
-    );
+                  tarealed,                  //Función que implementa la tarea. La misma no debe retornar.
+                 "Tarea led",                //Nombre que reprenta la tarea, para facilitar la depuración.
+                 configMINIMAL_STACK_SIZE,   //Tamaño del stack en bytes
+                 NULL,                       //Puntero que se utilizará como parámetro para la tarea que se está creando. Como no lo usamos ponemos NULL
+                 tskIDLE_PRIORITY+1,         //Prioridad de la tarea
+                 &xHandle1,                  //Puntero a la tarea
+                 0                           //Procesador donde se ejecuta la tarea
+                );
+         configASSERT( xHandle1 );  
 
-    // Gestion de errores
-	if(res == pdFAIL)
-	{
-		printf( "Error al crear la tarea.\r\n" );
-		while(true);					// si no pudo crear la tarea queda en un bucle infinito
-	}
+ if( xHandle1 == NULL )
+        {
+            vTaskDelete( xHandle1 );
+        }
 }
-
-// Implementacion de funcion de la tarea
-void tareaDestello( void* taskParmPtr )
+/////////////////////////////////////////////
+////////////////////////////////////////////
+void tarealed( void * pvParameters )
 {
-    // ---------- Configuraciones ------------------------------
-    gpio_pad_select_gpio(SALIDA1);
-      gpio_pad_select_gpio(SALIDA2);
-    gpio_set_direction(SALIDA1, GPIO_MODE_OUTPUT);
- gpio_set_direction(SALIDA2, GPIO_MODE_OUTPUT);
-    // ---------- Bucle infinito --------------------------
-    while( true )
+
+   // TickType_t xPeriodicity =  PERIODO;			    // Tarea periodica cada 1 seg
+   // TickType_t xLastWakeTime = xTaskGetTickCount(); // Guarda en la variable la cantidad de ticks
+
+    gpio_pad_select_gpio(led_rojo); 
+    gpio_pad_select_gpio(led_verde); 
+    gpio_set_direction(led_rojo, GPIO_MODE_OUTPUT);
+    gpio_set_direction(led_verde, GPIO_MODE_OUTPUT);
+
+while (true){
+
+
+if( xSemaphoreTake( semaforo ,T_ESPERA_SEM) == pdTRUE )
     {
-        if( xSemaphoreTake( semaforo ,T_ESPERA_MS) == pdTRUE ){
-
-        gpio_set_level( SALIDA1, 1 );
-        vTaskDelay( LED_ON );
-        gpio_set_level( SALIDA1, 0 );
-
+    gpio_set_level(led_verde, 1);
+    vTaskDelay(delay);
+    gpio_set_level(led_verde,0);
     }
-    else
-         gpio_set_level( SALIDA2, 1 );
-        vTaskDelay( LED_ON );
-        gpio_set_level( SALIDA2, 0 );
+
+else{
+    gpio_set_level(led_rojo, 1);
+    vTaskDelay(delay);
+    gpio_set_level(led_rojo,0);
+    }
+    //vTaskDelay(delay);
 }}
