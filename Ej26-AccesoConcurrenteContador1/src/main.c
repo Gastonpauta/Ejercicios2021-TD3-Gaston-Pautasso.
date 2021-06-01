@@ -10,6 +10,7 @@
 extern int contador ;
 //#define PERIODO     pdMS_TO_TICKS(100) //Periodo fijo cada 1 segundo
 #define led         GPIO_NUM_32  
+portMUX_TYPE mux2 = portMUX_INITIALIZER_UNLOCKED; //Inicializa el spinlock desbloqueado
 
 void tarealed( void* taskParmPtr );
 
@@ -46,11 +47,11 @@ void tarealed( void * pvParameters )
     gpio_set_direction(led, GPIO_MODE_OUTPUT);
 
 while (true){
-     
+    portENTER_CRITICAL(&mux2);
     PERIODO =  pdMS_TO_TICKS(contador);
     xPeriodicity = PERIODO ;
     delay= PERIODO / 2;
-
+    portEXIT_CRITICAL(&mux2);
     gpio_set_level(led, 1);
     vTaskDelay(delay);
     gpio_set_level(led,0);
