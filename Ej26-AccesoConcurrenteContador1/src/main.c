@@ -5,11 +5,10 @@
 #include "freertos/FreeRTOSConfig.h"
 #include "driver/gpio.h"
 #include "pulsador.h"
-
+#include "led2.h"
 
 extern int contador ;
-//#define PERIODO     pdMS_TO_TICKS(100) //Periodo fijo cada 1 segundo
-#define led         GPIO_NUM_32  
+#define led1         GPIO_NUM_32  
 portMUX_TYPE mux2 = portMUX_INITIALIZER_UNLOCKED; //Inicializa el spinlock desbloqueado
 
 void tarealed( void* taskParmPtr );
@@ -17,6 +16,7 @@ void tarealed( void* taskParmPtr );
 void app_main(){
 
     inicializarPulsador();
+    
 
         BaseType_t res = xTaskCreatePinnedToCore( 
 
@@ -35,16 +35,17 @@ void app_main(){
 		printf( "Error al crear la tarea.\r\n" );
 		while(true);					// si no pudo crear la tarea queda en un bucle infinito
 	}
+    creartareatres();
 }
 void tarealed( void * pvParameters )
 {
 
-    TickType_t xPeriodicity ;	
-    TickType_t delay ;		   
-    TickType_t xLastWakeTime = xTaskGetTickCount(); // Guarda en la variable la cantidad de ticks
-    TickType_t PERIODO ;
-    gpio_pad_select_gpio(led); 
-    gpio_set_direction(led, GPIO_MODE_OUTPUT);
+   static TickType_t xPeriodicity ;	
+   static TickType_t delay ;		   
+          TickType_t xLastWakeTime = xTaskGetTickCount(); // Guarda en la variable la cantidad de ticks
+   static TickType_t PERIODO ;
+    gpio_pad_select_gpio(led1); 
+    gpio_set_direction(led1, GPIO_MODE_OUTPUT);
 
 while (true){
     portENTER_CRITICAL(&mux2);
@@ -52,9 +53,9 @@ while (true){
     xPeriodicity = PERIODO ;
     delay= PERIODO / 2;
     portEXIT_CRITICAL(&mux2);
-    gpio_set_level(led, 1);
+    gpio_set_level(led1, 1);
     vTaskDelay(delay);
-    gpio_set_level(led,0);
+    gpio_set_level(led1,0);
 
     vTaskDelayUntil( &xLastWakeTime , xPeriodicity ); //espera a que el tiempo del periodo se cumpla
 }}

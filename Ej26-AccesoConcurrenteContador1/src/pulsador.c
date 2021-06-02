@@ -2,7 +2,7 @@
 #include "pulsador.h"
 int contador = 100 ;
 /*==================[ Definiciones ]===================================*/
-#define led2         GPIO_NUM_33  
+#define led_debug         GPIO_NUM_25
 #define T_REBOTE_MS     40
 #define T_REBOTE        pdMS_TO_TICKS(T_REBOTE_MS)
 /*==================[Prototipos de funciones]======================*/
@@ -14,7 +14,7 @@ static void botonLiberado( uint8_t  indice );
 void tareaPulsador( void* taskParmPtr );
 
 /*==================[Variables]==============================*/
-gpio_int_type_t pulsadorPines[N_PULSADOR] = { GPIO_NUM_18, GPIO_NUM_25};
+gpio_int_type_t pulsadorPines[N_PULSADOR] = { GPIO_NUM_18, GPIO_NUM_19};
 
 pulsadorInfo pulsador [N_PULSADOR];
 
@@ -28,8 +28,8 @@ void borrarDiferencia( uint8_t  indice )
 
 void inicializarPulsador( void )
 {
-    gpio_pad_select_gpio(led2); 
-    gpio_set_direction(led2, GPIO_MODE_OUTPUT);
+    gpio_pad_select_gpio(led_debug); 
+    gpio_set_direction(led_debug, GPIO_MODE_OUTPUT);
     for(int i = 0; i < N_PULSADOR; i++)
     {
         pulsador[i].tecla             = pulsadorPines[i];
@@ -138,6 +138,7 @@ case 0:{
     portENTER_CRITICAL(&mux);
     if (contador<900){
     contador=contador+100;
+      gpio_set_level(led_debug, 1);
     }
     portEXIT_CRITICAL(&mux);
     break;}
@@ -146,8 +147,8 @@ case 1:{
 
     portENTER_CRITICAL(&mux);
  if(contador>100){
-      gpio_set_level(led2, 1);
      contador= contador - 100;
+    gpio_set_level(led_debug,0);
     }
  portEXIT_CRITICAL(&mux);
  break;}
